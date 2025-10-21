@@ -1,0 +1,40 @@
+apiVersion: apps/v1 # Kubernetes API 版本，指定使用 apps/v1 版本
+kind: Deployment # 資源類型為 Deployment，管理 Pod 的生命週期
+metadata:
+  name: hello-api # Deployment 名稱
+  labels:
+    app: hello-api # 標籤，用於識別此 Deployment
+spec:
+  replicas: 1 # 指定要維持的 Pod 副本數量
+  selector:
+    matchLabels:
+      app: hello-api # 選擇帶有此標籤的 Pod 作為此 Deployment 的管理對象
+  template:
+    metadata:
+      labels:
+        app: hello-api # Pod 的標籤，與 selector 對應
+    spec:
+      containers:
+      - name: hello-api # 容器名稱
+        image: sfgx8801234/hello-api # 使用的 Docker 映像，請替換為你的 Docker Hub 映像名稱
+        ports:
+        - containerPort: 5000 # 容器開放的端口
+        resources:
+          requests: # Pod 啟動時保證分配的資源
+            memory: "64Mi" # 記憶體請求量
+            cpu: "250m" # CPU 請求量（m 表示千分之一個 CPU）
+          limits: # Pod 最大可使用的資源
+            memory: "128Mi" # 記憶體限制
+            cpu: "500m" # CPU 限制
+---
+apiVersion: v1 # Kubernetes API 版本，指定使用 v1 版本
+kind: Service # 資源類型為 Service，負責將流量導向 Pod
+metadata:
+  name: hello-api # Service 名稱
+spec:
+  selector:
+    app: hello-api # 選擇帶有此標籤的 Pod 作為服務目標
+  ports:
+  - port: 80 # Service 對外暴露的端口
+    targetPort: 5000 # 流量轉發到 Pod 的端口
+  type: LoadBalancer # Service 類型為 LoadBalancer，會建立雲端負載均衡器
